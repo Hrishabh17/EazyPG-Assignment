@@ -10,7 +10,8 @@ const verifyToken = (req, res, next)=>{
         decodedToken = jwt.verify(token, process.env.JWT_KEY)
     } 
     catch(err) {
-        err.statusCode = 500
+        err.statusCode = 406
+        err.message = "Invalid JWT"
         throw err
     }
     if(!decodedToken){
