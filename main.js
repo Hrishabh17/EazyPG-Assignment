@@ -12,6 +12,8 @@ app.use(bodyParser.urlencoded({extended:true}))
 
 app.use('/api/auth', require('./routes/authRoute'))
 app.use('/api/users', require('./routes/userRoute'))
+app.use('/api/posts', require('./routes/postRoute'))
+
 
 app.all('*', (req, res)=>{
     const error = new Error(
@@ -29,15 +31,14 @@ app.use((error, req, res, next) => {
     res.status(status).json({ message: message, data:data});
 });
 
-// createAssociations()
+createAssociations()
 
-// sequelize.sync().then((res)=>{
+// sequelize.sync({force:true}).then((res)=>{
 //     app.listen(4000 || process.env.PORT)
 // }).catch((err)=>{
 //     console.log(err)
 // })
 
 sequelize.authenticate().then(()=>{
-    createAssociations()
     app.listen(4000 || process.env.PORT, ()=>console.log(`Server is running on Port 4000`))
 })
