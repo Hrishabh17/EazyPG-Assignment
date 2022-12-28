@@ -3,13 +3,13 @@ const { sequelize } = require('../utils/database')
 
 const Post = sequelize.define('Post',
     {
-        PostId:{
+        postId:{
             type:Sequelize.STRING,
             allowNull:false,
             primaryKey:true
         },
         title:{
-            type:Sequelize.STRING,
+            type:Sequelize.STRING(25),
             allowNull:false,
         },
         summary:{
@@ -17,6 +17,10 @@ const Post = sequelize.define('Post',
             allowNull:false
         },
         content:{
+            type:Sequelize.TEXT,
+            allowNull:false
+        },
+        category:{
             type:Sequelize.STRING,
             allowNull:false
         },
@@ -31,4 +35,12 @@ const Post = sequelize.define('Post',
     }
 )
 
-module.exports = { Post }
+const PostAlreadyExists = async(title) =>{
+    const result = await Post.findOne({where:{title:title}, attributes:['title']})
+    return result
+}
+
+module.exports = { 
+    Post,
+    PostAlreadyExists
+}
