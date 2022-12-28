@@ -19,13 +19,12 @@ const signUpPost = (req, res, next)=>{
 
     bcrypt.hash(password, parseInt(process.env.PASSWORD_ENCRYPT_LEN)).then((hashedPassword)=>{
         bcrypt.hash(userName, parseInt(process.env.USERNAME_ENCRYPT_LEN)).then((hashedUserName)=>{
-            const user = new User({
+            return User.create({
                 emailId:emailId,
                 userName:userName,
                 password:hashedPassword,
                 userId:hashedUserName
             })
-            return user.save()
         })
     }).then((result)=>{
         res.status(201).send('User Successfully created')

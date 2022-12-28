@@ -22,7 +22,8 @@ const createPost = (req, res, next)=>{
     let postId;
 
     bcrypt.hash(normalId, parseInt(process.env.USERNAME_ENCRYPT_LEN)).then((postIdHashed)=>{
-        const post = new Post({
+        postId = postIdHashed
+        Post.create({
             postId:postIdHashed,
             title:title,
             summary:summary,
@@ -31,14 +32,10 @@ const createPost = (req, res, next)=>{
             authorId:req.userId,
             published:1
         })
-        postId = postIdHashed
-        post.save()
     }).then(()=>{
         keywords.map((key)=>{
             createIfKeyNotExists(key, next).then((res)=>{
-                const keySave = new KeyPost({keyId:res.dataValues.keyId, postId:postId})
-                keySave.save()
-
+                KeyPost.create({keyId:res[0].dataValues.keyId, postId:postId})
             })
         })
     }).then(()=>{
@@ -59,26 +56,11 @@ const fetchPostById = (req, res, next)=>{
 
     const postId = req.query.id
 
-    // const postRes = await Post.findByPk(postId)
-
-    // const keyPostRes = await postRes.getKeywords()
-
-    let keywords = [];
-    let Posts;
-    Post.findByPk(postId).then((post)=>{
-        Posts = post
-        return post.getKeywords()
-    }).then((keys)=>{
-        keys.map(({dataValues})=>{
-            keywords.push(dataValues.key)
-        })
-    }).then(()=>{
-        Posts.keywords = keywords
-        res.status(200).json({data:{post:Posts, keywords:keywords}})
+    Post.findAll({where:{postId:postId}, include:[{model:Keyword, attributes:['key'], through:{attributes:[]}}]}).then((result)=>{
+        res.status(200).json({data:{post:result}})
+    }).catch((err)=>{
+        next(err)
     })
-
-    // console.log(keyPostRes[0].dataValues.key)
-    
 }
 
 module.exports = {
