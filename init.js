@@ -1,6 +1,7 @@
 const pg = require('pgtools')
 const fs = require("fs")
 const path = require("path")
+const  crypto = require('crypto')
 
 const createNewDatabase = (host, user, dbname, password, port) =>{
     const config = {
@@ -40,6 +41,9 @@ const DropExistingDatabase = (host, user, dbname, password, port) =>{
 }
 
 const saveCredentials = (host, user, dbname, password, port) => {
+
+    const jwt_key = crypto.randomBytes(30).toString('hex')
+
     fs.writeFileSync(
       path.join(__dirname, ".", ".env"),
       `DB_USER=${user}\n` +
@@ -49,7 +53,7 @@ const saveCredentials = (host, user, dbname, password, port) => {
       `DB_PORT=${port}\n` +
       `PASSWORD_ENCRYPT_LEN=10\n`+
       `USERNAME_ENCRYPT_LEN=5\n`+
-      `JWT_KEY=eb5a94c02b629734a3de765c597d5\n`
+      `JWT_KEY=${jwt_key}\n`
     );
     console.log("Credentials saved to .env file")
 }
