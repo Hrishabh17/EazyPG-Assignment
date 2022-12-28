@@ -28,6 +28,7 @@ const signUpPost = (req, res, next)=>{
     }).catch((err)=>{
         if(!err.statusCode){
             err.statusCode = 500
+            err.message= 'Not allowed! Check Headers and Body Again'
         }
         next(err)
     })
@@ -66,10 +67,18 @@ const loginPost = (req, res, next)=>{
                 res.status(200).json({message:'Authentication Successful', data:{JWT:token}})
             }
         }).catch((err)=>{
+            if(!err.statusCode){
+                err.statusCode = 500
+                err.message= 'Not allowed! Check Headers and Body Again'
+            }
             next(err)
         })
 
     }).catch((err)=>{
+        if(!err.statusCode){
+            err.statusCode = 500
+            err.message= 'Not allowed! Check Headers and Body Again'
+        }
         next(err)
     })
 }

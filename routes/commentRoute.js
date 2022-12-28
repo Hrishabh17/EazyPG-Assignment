@@ -1,12 +1,15 @@
 const router = require('express').Router()
-const { body } = require('express-validator')
-const { createComment, updateComment, deleteComment, getComment } = require('../controllers/commentController')
+const { body, param } = require('express-validator')
+const { createComment, updateComment, deleteComment, getComment, getAllComments } = require('../controllers/commentController')
 const verifyToken = require('../middlewares/jwtCheck')
 const { commentExists, isAuthenticatedUser } = require('../models/commentsModel')
 const { PostAlreadyExistsById } = require('../models/postModel')
 
-router.get('/', [
-    body('commentId').exists().withMessage('Provide Comment Id')
+
+router.get('/', getAllComments)
+
+router.get('/:commentId', [
+    param('commentId').exists().withMessage('Provide Comment Id')
     .trim()
     .isUUID().withMessage('Provide valid Comment Id')
     .custom((commentId, {req})=>{
@@ -20,7 +23,7 @@ router.get('/', [
 ], getComment)
 
 router.post('/', verifyToken, [
-    body('postId').trim().exists()
+    body('postId').exists().trim()
     .isUUID().withMessage('Provide valid Post Id')
     .custom((postId, {req})=>{
         return PostAlreadyExistsById(postId).then((result)=>{
@@ -30,14 +33,14 @@ router.post('/', verifyToken, [
         }) 
     }),
 
-    body('content').trim().exists()
+    body('content').exists().trim()
     .not().isEmpty()
     .withMessage('Provide Comment Content for creating the comment')
 
 ], createComment)
 
-router.put('/', verifyToken, [
-    body('commentId').exists().withMessage('Provide Comment Id')
+router.put('/:commentId', verifyToken, [
+    param('commentId').exists().withMessage('Provide Comment Id')
     .trim()
     .isUUID().withMessage('Provide valid Comment Id')
     .custom((commentId, {req})=>{
@@ -54,14 +57,14 @@ router.put('/', verifyToken, [
         }) 
     }),
 
-    body('content').trim().exists()
+    body('content').exists().trim()
     .not().isEmpty()
     .withMessage('Provide Comment Content for updating the comment')
 
 ], updateComment)
 
-router.delete('/', verifyToken, [
-    body('commentId').exists().withMessage('Provide Comment Id')
+router.delete('/:commentId', verifyToken, [
+    param('commentId').exists().withMessage('Provide Comment Id')
     .trim()
     .isUUID().withMessage('Provide valid Comment Id')
     .custom((commentId, {req})=>{

@@ -34,7 +34,8 @@ const updateComment = (req, res, next)=>{
         throw error
     }
 
-    const {commentId, content} = req.body
+    const commentId = req.params.commentId
+    const {content} = req.body
 
     Comment.update({content:content},{where:{commentId:commentId, userId:req.userId}}).then(()=>{
         res.status(200).json({message:'Comment updated successfully'})
@@ -53,7 +54,7 @@ const deleteComment = (req, res, next)=>{
         throw error
     }
 
-    const {commentId} = req.body
+    const commentId = req.params.commentId
 
     Comment.destroy({where:{commentId:commentId, userId:req.userId}}).then(()=>{
         res.status(200).json({message:'Comment deleted successfully'})
@@ -72,7 +73,7 @@ const getComment = (req, res, next)=>{
         throw error
     }
 
-    const {commentId} = req.body
+    const commentId = req.params.commentId
 
     Comment.findOne({where:{commentId:commentId}, attributes:['commentId', 'content', 'postId']}).then((result)=>{
         res.status(200).json({data:{commentId: result}})
@@ -81,9 +82,20 @@ const getComment = (req, res, next)=>{
     })
 }
 
+const getAllComments = (req, res, next)=>{
+    Comment.findAll().then((result)=>{
+        res.status(200).json({data:result})
+    }).catch((err)=>{
+        err.statusCode = 500
+        err.message = 'Something went wrong! Try Again'
+        next(err)
+    })
+}
+
 module.exports = {
     createComment,
     updateComment,
     deleteComment,
-    getComment
+    getComment, 
+    getAllComments
 }

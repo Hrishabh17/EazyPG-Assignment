@@ -33,6 +33,11 @@ const checkUserNameAlreadyExists = async(userName) =>{
     return res
 }
 
+const checkUserIdAlreadyExists = async(userId) =>{
+    const res = await User.findOne({where:{userId: userId}, attributes:['userId']})
+    return res
+}
+
 const checkEmailAlreadyExists = async(emailId) =>{
     const res = await User.findOne({where:{emailId: emailId}, attributes:['userId']})
     return res
@@ -42,5 +47,6 @@ const checkEmailAlreadyExists = async(emailId) =>{
 module.exports = { 
     User,
     checkUserNameAlreadyExists,
-    checkEmailAlreadyExists
+    checkEmailAlreadyExists,
+    checkUserIdAlreadyExists
 }

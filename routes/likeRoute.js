@@ -2,7 +2,8 @@ const router = require('express').Router()
 const { body } = require('express-validator')
 const { likePost, unlikePost } = require('../controllers/likeController')
 const verifyToken = require('../middlewares/jwtCheck')
-const { PostAlreadyExistsById } = require('../models/postModel')
+const { isAuthenticatedToUnLike } = require('../models/likeModel')
+const { PostAlreadyExistsById, isAuthenticatedToDelete } = require('../models/postModel')
 
 router.post('/like', verifyToken, [
     body('postId')
@@ -15,6 +16,20 @@ router.post('/like', verifyToken, [
             if(!result){
                 return Promise.reject('Post with given Id does not exists')
             }
+        }).then(()=>{
+            return isAuthenticatedToDelete(postId, req.userId).then((result)=>{
+                if(!result){
+                    return Promise.reject('Not Authenticated to unlike')
+                }
+            }).then((delAuth)=>{
+                if(!delAuth){
+                    return isAuthenticatedToUnLike(postId, req.userId).then((result)=>{
+                        if(result){
+                            return Promise.reject('Already Liked')
+                        }
+                    })
+                }
+            })
         })
     })
 
@@ -31,6 +46,20 @@ router.post('/unlike', verifyToken, [
             if(!result){
                 return Promise.reject('Post with given Id does not exists')
             }
+        }).then(()=>{
+            return isAuthenticatedToDelete(postId, req.userId).then((result)=>{
+                if(!result){
+                    return Promise.reject('Not Authenticated to unlike')
+                }
+            }).then((delAuth)=>{
+                if(!delAuth){
+                    return isAuthenticatedToUnLike(postId, req.userId).then((result)=>{
+                        if(!result){
+                            return Promise.reject('Already Unliked')
+                        }
+                    })
+                }
+            })
         })
     })
 
