@@ -3,7 +3,7 @@ const dotenv = require('dotenv')
 
 dotenv.config()
 
-const verify = (req, res, next)=>{
+const verifyToken = (req, res, next)=>{
     const token = req.get('Authorization')
     let decodedToken;
     try {
@@ -24,4 +24,4 @@ const verify = (req, res, next)=>{
     next()
 }
 
-module.exports = verify
+module.exports = verifyToken
