@@ -22,18 +22,10 @@ const Keyword = sequelize.define('Keyword',
 )
 
 const createIfKeyNotExists = async(keyword, next)=>{
-    const result = await Keyword.findOne({where:{key:keyword}, attributes:['keyId']})
-    if(!result){
-        const key = new Keyword({
+    return Keyword.findOrCreate({where:{
             key:keyword
-        })
-        return key.save().then((res)=>{
-            return res
-        }).catch((err)=>{
-            next(err)
-        })
-    }
-    return result
+        }
+    })
 }
 
 module.exports = {
