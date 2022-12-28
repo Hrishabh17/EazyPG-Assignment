@@ -1,10 +1,11 @@
-const { Sequelize } = require('sequelize')
+const { Sequelize, Op } = require('sequelize')
 const { sequelize } = require('../utils/database')
 
 const Post = sequelize.define('Post',
     {
         postId:{
-            type:Sequelize.STRING,
+            type:Sequelize.UUID,
+            defaultValue:Sequelize.UUIDV4,
             allowNull:false,
             primaryKey:true
         },
@@ -35,12 +36,30 @@ const Post = sequelize.define('Post',
     }
 )
 
-const PostAlreadyExists = async(title) =>{
+const PostAlreadyExistsByTitle = async(title) =>{
     const result = await Post.findOne({where:{title:title}, attributes:['title']})
+    return result
+}
+
+const PostAlreadyExistsById = async(id) =>{
+    const result = await Post.findOne({where:{postId:id}, attributes:['title']})
+    return result
+}
+
+const PostAlreadyExistsByTitleId = async(title, id) =>{
+    const result = await Post.findOne({where:{postId:{[Op.not]:id}, title:title}, attributes:['title']})
+    return result
+}
+
+const isAuthenticatedToDelete = async(postId, authorId) =>{
+    const result = await Post.findOne({where:{postId:postId, authorId:authorId}})
     return result
 }
 
 module.exports = { 
     Post,
-    PostAlreadyExists
+    PostAlreadyExistsByTitle,
+    PostAlreadyExistsById,
+    PostAlreadyExistsByTitleId,
+    isAuthenticatedToDelete
 }
