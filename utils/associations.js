@@ -10,9 +10,9 @@ const createAssociations = ()=>{
     createCommentAssociation()
     createLiketAssociation(),
     createKeywordPostAssociation()
-    console.log(Object.keys(User.prototype))
-    console.log(Object.keys(Post.prototype))
-    console.log(Object.keys(Comment.prototype))
+    // console.log(Object.keys(User.prototype))
+    // console.log(Object.keys(Post.prototype))
+    // console.log(Object.keys(Comment.prototype))
 }
 
 const createPostUserAssociation = ()=>{
@@ -37,6 +37,7 @@ const createLiketAssociation = ()=>{
 const createKeywordPostAssociation = ()=>{
     Post.belongsToMany(Keyword, {through: KeyPost, foreignKey:'postId', onDelete:'CASCADE'})
     Keyword.belongsToMany(Post, {through:KeyPost, foreignKey:'keyId', onDelete:'CASCADE'})
+    Post.hasOne(Post, {foreignKey:'postId', as:'Post_Keywords'})
 }
 
 module.exports = createAssociations

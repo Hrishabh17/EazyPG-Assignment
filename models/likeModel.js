@@ -16,4 +16,12 @@ const Like = sequelize.define('Like',
     }
 )
 
-module.exports = { Like }
+const isAuthenticatedToUnLike = async(postId, userId)=>{
+    const result = await Like.findOne({where:{postId:postId, userId:userId}})
+    return result
+}
+
+module.exports = { 
+    Like,
+    isAuthenticatedToUnLike 
+}

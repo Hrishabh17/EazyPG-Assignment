@@ -33,13 +33,7 @@ app.use((error, req, res, next) => {
     if(error.data){
         data = error.data || []
     }
-    if(status !== 500){
-        message = error.message
-    }
-    else{
-        message = "Something went wrong! Server or Database Error"
-    }
-
+    message = error.message
     res.status(status).json({ message: message, data:data});
 });
 
