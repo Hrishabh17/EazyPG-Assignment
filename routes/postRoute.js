@@ -1,9 +1,73 @@
 const router = require('express').Router()
-const { query, body } = require('express-validator')
-const { createPost, fetchPostById, deletePost, updatePost } = require('../controllers/postController')
+const { query, body, param } = require('express-validator')
+const { createPost, fetchPostById, deletePost, updatePost, getPostsWithFilters } = require('../controllers/postController')
 
 const verifyToken = require('../middlewares/jwtCheck')
 const { PostAlreadyExistsByTitle, PostAlreadyExistsById, PostAlreadyExistsByTitleId, isAuthenticatedToDelete } = require('../models/postModel')
+const { checkUserIdAlreadyExists } = require('../models/userModel')
+
+router.get('/',[
+    query().custom(query => {
+        const keys = ['keywords', 'content', 'category', 'authorId','limit', 'offset', 'page', 'mostLike', 'mostComment', 'mostRecent'];
+        return Object.keys(query).every(key => keys.includes(key));
+    })
+    .withMessage('Extra query params not allowed'),
+
+    query('content').optional()
+    .trim()
+    .isLength({max:10})
+    .withMessage('content search query should have max length 10'),
+
+    query('keywords').optional()
+    .isArray()
+    .withMessage('keywords query should be an array with max 5 keywords'),
+
+    query('authorId').optional()
+    .isUUID()
+    .withMessage('authorId query should be an UUID'),
+    
+    query('category').optional()
+    .trim()
+    .not().isEmpty()
+    .withMessage('category query should not be empty'),
+
+    query('mostLike').optional()
+    .trim()
+    .not().isEmpty()
+    .isBoolean()
+    .withMessage('mostLike query should be a boolean'),
+
+    query('mostComment').optional()
+    .trim()
+    .not().isEmpty()
+    .isBoolean()
+    .withMessage('mostLike query should be a boolean'),
+
+    query('mostRecent').optional()
+    .trim()
+    .not().isEmpty()
+    .isBoolean()
+    .withMessage('mostLike query should be a boolean'),
+
+    query('page').optional()
+    .trim()
+    .not().isEmpty()
+    .isNumeric()
+    .withMessage('page query should be a number'),
+
+    query('limit').optional()
+    .trim()
+    .not().isEmpty()
+    .isNumeric()
+    .withMessage('limit query should be a number'),
+
+    query('offset').optional()
+    .trim()
+    .not().isEmpty()
+    .isNumeric()
+    .withMessage('offset query should be a number')
+
+], getPostsWithFilters)
 
 router.post('/', verifyToken, [
     body('title').trim()
@@ -14,6 +78,12 @@ router.post('/', verifyToken, [
             if(result){
                 return Promise.reject('Post with same title exists')
             }
+        }).then(()=>{
+            return checkUserIdAlreadyExists(req.userId).then((result)=>{
+                if(!result){
+                    return Promise.reject('User does not exists')
+                }
+            })
         })
     }),
 
@@ -34,16 +104,16 @@ router.post('/', verifyToken, [
     
 ], createPost)
 
-router.get('/', [
-    query('id').trim()
+router.get('/:postId', [
+    param('postId').trim()
     .not().isEmpty()
     .isUUID()
     .withMessage('Enter a valid id to fetch data')
 
 ], fetchPostById)
 
-router.delete('/', verifyToken, [
-    query('id').trim()
+router.delete('/:postId', verifyToken, [
+    param('postId').trim()
     .not().isEmpty()
     .isUUID()
     .withMessage('Enter a valid post id')
@@ -52,42 +122,40 @@ router.delete('/', verifyToken, [
             if(!result){
                 return Promise.reject('Post with given Id does not exists')
             }
-        })
-    })
-    .custom((id, {req})=>{
-        return isAuthenticatedToDelete(id, req.userId).then((result)=>{
-            if(!result){
-                return Promise.reject('Not Authenticated to Delete')
-            }
+        }).then(()=>{
+            return isAuthenticatedToDelete(id, req.userId).then((result)=>{
+                if(!result){
+                    return Promise.reject('Not Authenticated to Delete')
+                }
+            })
         })
     })
 
 ], deletePost)
 
-router.put('/', verifyToken, [
+router.put('/:postId', verifyToken, [
 
     body().custom(body => {
-        const keys = ['postId', 'title', 'summary', 'category', 'keywords', 'content'];
+        const keys = ['title', 'summary', 'category', 'keywords', 'content'];
         return Object.keys(body).every(key => keys.includes(key));
     })
     .withMessage('Some extra parameters are sent'),
 
-    body('postId').trim()
+    param('postId').trim()
     .not().isEmpty()
     .withMessage('Provide a Post Id')
     .isUUID().withMessage('Provide a valid Post Id')
-    .custom((postId, {req})=>{
-        return PostAlreadyExistsById(postId).then((result)=>{
+    .custom((id, {req})=>{
+        return PostAlreadyExistsById(id).then((result)=>{
             if(!result){
                 return Promise.reject('Post with given Id does not exists')
             }
-        })
-    })
-    .custom((id, {req})=>{
-        return isAuthenticatedToDelete(id, req.userId).then((result)=>{
-            if(!result){
-                return Promise.reject('Not Authenticated to Update')
-            }
+        }).then(()=>{
+            return isAuthenticatedToDelete(id, req.userId).then((result)=>{
+                if(!result){
+                    return Promise.reject('Not Authenticated to Update')
+                }
+            })
         })
     }),
 

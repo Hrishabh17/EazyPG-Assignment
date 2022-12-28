@@ -10,7 +10,7 @@ const UserProfileGet = (req, res, next)=>{
         error.data = errors.array()
         throw error
     }
-    const userName = req.query.id
+    const userName = req.params.id
     User.findOne({where:{userName:userName}, attributes:['emailId', 'userName', 'userId']}).then((result)=>{
         if(!result){
             const error = new Error('User Name does not exists')
