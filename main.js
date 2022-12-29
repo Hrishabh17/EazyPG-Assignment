@@ -39,12 +39,12 @@ app.use((error, req, res, next) => {
 
 createAssociations()
 
-// sequelize.sync({force:true}).then((res)=>{
-//     app.listen(4000 || process.env.PORT)
-// }).catch((err)=>{
-//     console.log(err)
-// })
-
-sequelize.authenticate().then(()=>{
-    app.listen(4000 || process.env.PORT, ()=>console.log(`Server is running on Port 4000`))
+sequelize.sync({force:true}).then((res)=>{
+    app.listen(4000 || process.env.PORT)
+}).catch((err)=>{
+    console.log(err)
 })
+
+// sequelize.authenticate().then(()=>{
+//     app.listen(4000 || process.env.PORT, ()=>console.log(`Server is running on Port 4000`))
+// })

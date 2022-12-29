@@ -24,7 +24,7 @@ const signUpPost = (req, res, next)=>{
                 password:hashedPassword,
             })
     }).then(()=>{
-        res.status(201).send('User Successfully created')
+        res.status(201).json({message:'User Successfully created'})
     }).catch((err)=>{
         if(!err.statusCode){
             err.statusCode = 500
